@@ -13,6 +13,9 @@
 #include "same.h"
 
 class RocketDebug {
+	
+	struct bool_yes { char c[3]; };
+	
 	struct s_base {
 		virtual void stream(std::string const &) = 0;
 		virtual s_base *Clone() const = 0;
@@ -54,7 +57,10 @@ class RocketDebug {
 	class CanOStream {
 		template <typename U>
 		static auto check(int)->decltype(std::declval<std::ostream&>()
-		<< std::declval<U const &>(), yes());
+		<< std::declval<U const &>(), typename std::enable_if<!std::is_same<bool, U>::value>::type(), yes());
+		template <typename U>
+		static auto check(char)->decltype((std::declval<std::ostream&>()
+		<< std::declval<U const &>()), typename std::enable_if<std::is_same<bool, U>::value>::type(), bool_yes());
 		template <typename U>
 		static no check(...);
 		public:
@@ -77,7 +83,7 @@ class RocketDebug {
 			return ret;
 		}
 		
-		static std::string stringify_impl(bool const &rhs, yes) {
+		static std::string stringify_impl(bool const &rhs, bool_yes) {
 			return std::string{rhs ? "true" : "false"};
 		}
 		
