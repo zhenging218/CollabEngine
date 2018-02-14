@@ -32,4 +32,9 @@ struct at_least_one_same<first, rest...> : public at_least_one_same<rest...> {
 	
 };
 
+template <bool ... rest>
+struct at_least_one_same<true, rest...> {
+	static constexpr bool value = true;
+}
+
 #endif
