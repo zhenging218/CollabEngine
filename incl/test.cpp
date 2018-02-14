@@ -1,33 +1,33 @@
-// #include "RocketDebug.h"
+#include "RocketDebug.h"
 #include <iostream>
+#include <vector>
 #include <string>
 
-#include <functional>
 
-void foo(std::string const &rhs) {
-	std::cout << "foo called with " << rhs << std::endl;
+struct foo {
+	std::vector<std::string> stuff;
+};
+
+foo &operator<<(foo &f, std::string const &rhs) {
+	if(f.stuff.empty() || f.stuff.back().back() == '\n') {
+		f.stuff.push_back(rhs);
+	} else {
+		f.stuff[f.stuff.size() - 1] += rhs;
+	}
+	return f;
 }
 
-struct boo {
-	void bar(std::string const &rhs) {
-		std::cout << "boo::bar called with " << rhs << std::endl;
-	}
-};
-
-struct goo {
-	
-	template <typename T, typename ... Args>
-	using bind_type = decltype(std::bind(std::declval<T>(), ));
-	
-	template <typename T, typename ... Args>
-	static auto get_func(decltype(std::bind(std::declval<T>(), std::declval<Args>()...)) fn)->std::function<T>{
-		return std::function<T>{fn};
-	}
-};
-
 int main() {
-	boo b;
-	auto i = goo::get_func(std::bind(&boo::bar, &b, std::string{}));
-	// i(std::string{"hello"});
-	return 0;
+	foo f;
+	Debug += f;
+	Debug << "hello world" << std::endl;
+	Debug << "aaa" << std::endl;
+	for(auto const &i : f.stuff) {
+		std::cout << i << std::endl;
+	}
+	Debug -= f;
+	Debug << "hello again" << std::endl;
+	for(auto const &i : f.stuff) {
+		std::cout << i << std::endl;
+	}
 }
